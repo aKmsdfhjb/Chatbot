@@ -1,12 +1,7 @@
-Since I cannot browse the specific private or internal contents of the repository in real-time, I have created a professional and comprehensive **README.md** template based on the typical structure of a modern Chatbot project.
-
-You can copy the markdown below and customize the bracketed sections (e.g., `[Project Description]`) to match your specific implementation.
-
----
 
 # Chatbot
 
-A robust and scalable chatbot application built with [Insert Tech Stack, e.g., Python and OpenAI]. This project is designed to provide [insert primary goal, e.g., automated customer support / a conversational AI interface / a task automation tool].
+A robust and scalable chatbot application built with Python . 
 
 ## 🚀 Features
 
