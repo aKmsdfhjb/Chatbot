@@ -14,7 +14,7 @@ python app.py
 ## Key repository references
 
 - [Source repository](https://github.com/aKmsdfhjb/Chatbot)
-- [README](../../README.md)
+- [README](https://github.com/aKmsdfhjb/Chatbot#readme)
 - [Architecture](Architecture.md)
 
 ## Scope and limitations
