@@ -1,104 +1,72 @@
+# KMC Knowledge Assistant
 
-# Chatbot
+A retrieval-based chatbot that answers questions from the repository's KMC knowledge-base dataset. It combines each row's context and question, builds TF-IDF vectors, compares a user's query with cosine similarity, and returns the answer from the closest row.
 
-A robust and scalable chatbot application built with Python . 
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/API-Flask-171715?style=flat-square&logo=flask&logoColor=white)
+![NLP](https://img.shields.io/badge/NLP-TF--IDF%20%2B%20Cosine-c34b2e?style=flat-square)
 
-## 🚀 Features
+## Browser interface
 
-* **Real-time Interaction:** Fast response times using [WebSockets/FastAPI/etc].
-* **LLM Integration:** Powered by [OpenAI GPT-4 / Anthropic Claude / Llama 3].
-* **Context Awareness:** Maintains conversation history for coherent multi-turn dialogues.
-* **Customizable Personas:** Easily switch between different assistant personalities.
-* **Responsive UI:** (If applicable) Clean web interface built with [React/Streamlit/Gradio].
+The static client is deployed separately from the Python API. After enabling **Settings → Pages → Build and deployment → GitHub Actions**, the interface will be available at:
 
-## 🛠️ Tech Stack
+[Open the chatbot interface](https://aKmsdfhjb.github.io/Chatbot/)
 
-* **Backend:** Python 3.10+, FastAPI/Flask
-* **AI/ML:** LangChain, OpenAI API
-* **Frontend:** React.js / Tailwind CSS (Optional)
-* **Database:** Redis (for session management) / PostgreSQL
+On GitHub Pages, enter the public URL of your Flask API in **Backend API Base URL**. When running the Flask server locally, leave that field blank.
 
-## 📋 Prerequisites
+## How it works
 
-Before you begin, ensure you have the following installed:
+~~~mermaid
+flowchart TD
+ A[chatbot.csv: context, question, answer] --> B[setup_model.py]
+ B --> C[TF-IDF vectorizer]
+ B --> D[Document TF-IDF matrix]
+ B --> E[Prepared knowledge-base data]
+ F[User question] --> G[Vectorize query]
+ C --> G
+ G --> H[Cosine similarity]
+ D --> H
+ H --> I{Best score ≥ 0.20?}
+ I -->|Yes| J[Return matched answer]
+ I -->|No| K[Ask user to rephrase]
+ E --> J
+~~~
 
-* [Python 3.10+](https://www.python.org/downloads/)
-* [Node.js](https://nodejs.org/) (if using a JavaScript frontend)
-* An API Key from [OpenAI](https://platform.openai.com/) or your preferred provider.
+## Run locally
 
-## ⚙️ Installation
+Use Python 3.10 or newer.
 
-1. **Clone the repository:**
-```bash
-git clone https://github.com/aKmsdfhjb/Chatbot.git
-cd Chatbot
-
-```
-
-
-2. **Set up a virtual environment:**
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-```
-
-
-3. **Install dependencies:**
-```bash
+~~~bash
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
+python setup_model.py
+python app.py
+~~~
 
-```
+Open http://127.0.0.1:5000.
 
+## API
 
-4. **Environment Variables:**
-Create a `.env` file in the root directory and add your keys:
-```env
-OPENAI_API_KEY=your_api_key_here
-DATABASE_URL=your_database_url
-DEBUG=True
+- GET /health — reports whether model artifacts loaded successfully.
+- POST /ask — JSON body: {"question":"What programmes are offered?"}.
 
-```
+The API returns an answer, a cosine-similarity score and whether a close match was found. Set CORS_ORIGINS to a comma-separated allowlist of trusted browser origins when deploying.
 
+## Repository layout
 
+- chatbot.csv — source knowledge base.
+- setup_model.py — builds TF-IDF artifacts.
+- model/ — generated vectorizer, matrix and prepared data.
+- app.py — Flask API and local server.
+- templates/index.html — responsive browser client; also used as the GitHub Pages artifact.
+- .github/workflows/pages.yml — static GitHub Pages deployment.
 
-## 🚀 Usage
+## Limitations
 
-1. **Start the backend server:**
-```bash
-python main.py
+This is a TF-IDF retrieval system, not an LLM. Answers are limited to the dataset and may be incorrect when a question is ambiguous or outside the knowledge base. The similarity threshold is a simple heuristic, not a calibrated confidence probability.
 
-```
+## License
 
-
-2. **Access the application:**
-Open your browser and navigate to `http://localhost:8000` (or the port specified in your config).
-
-## 🧪 Running Tests
-
-To run the automated tests for this system:
-
-```bash
-pytest
-
-```
-
-## 🤝 Contributing
-
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
-## ✉️ Contact
-
-Project Link: [https://github.com/aKmsdfhjb/Chatbot](https://github.com/aKmsdfhjb/Chatbot)
-
----
+MIT — see LICENSE.
