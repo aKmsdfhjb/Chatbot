@@ -1,40 +1,41 @@
+from pathlib import Path
+import pickle
+
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-import pickle
-import os
 
-# --- 1. Setup Data and Model ---
-# Assuming 'Chatbot.csv' is in the same directory
-try:
-    df = pd.read_csv("Chatbot.csv")
-except FileNotFoundError:
-    print("Error: Chatbot.csv not found. Please place your data file here.")
-    exit()
+BASE_DIR = Path(__file__).resolve().parent
+DATA_FILE = BASE_DIR / "chatbot.csv"
+MODEL_DIR = BASE_DIR / "model"
 
-# Combine context and question for better search results
-df['search_text'] = df['context'] + " " + df["question"]
 
-# Initialize and fit the vectorizer
-vectorizer = TfidfVectorizer()
-X = vectorizer.fit_transform(df['search_text'])
+def main():
+    if not DATA_FILE.is_file():
+        raise FileNotFoundError(f"Dataset not found: {DATA_FILE}")
 
-# --- 2. Save Model Artifacts ---
-# Create the model directory if it doesn't exist
-model_dir = 'model'
-if not os.path.exists(model_dir):
-    os.makedirs(model_dir)
+    data = pd.read_csv(DATA_FILE)
+    required_columns = {"context", "question", "answer"}
+    missing = required_columns.difference(data.columns)
+    if missing:
+        raise ValueError(f"Dataset is missing required columns: {', '.join(sorted(missing))}")
 
-# Save the TfidfVectorizer
-with open(os.path.join(model_dir, 'tfidf_vectorizer.pkl'), 'wb') as f:
-    pickle.dump(vectorizer, f)
+    data = data.dropna(subset=["context", "question", "answer"]).copy()
+    if data.empty:
+        raise ValueError("The dataset contains no complete question/answer rows.")
 
-# Save the TF-IDF matrix (X)
-with open(os.path.join(model_dir, 'tfidf_matrix_X.pkl'), 'wb') as f:
-    pickle.dump(X, f)
+    data["search_text"] = data["context"].astype(str) + " " + data["question"].astype(str)
+    vectorizer = TfidfVectorizer()
+    matrix = vectorizer.fit_transform(data["search_text"])
 
-# Save the DataFrame (especially the 'answer' column)
-df.to_pickle(os.path.join(model_dir, 'chatbot_data.pkl'))
+    MODEL_DIR.mkdir(parents=True, exist_ok=True)
+    with (MODEL_DIR / "tfidf_vectorizer.pkl").open("wb") as file:
+        pickle.dump(vectorizer, file)
+    with (MODEL_DIR / "tfidf_matrix_X.pkl").open("wb") as file:
+        pickle.dump(matrix, file)
+    data.to_pickle(MODEL_DIR / "chatbot_data.pkl")
 
-print("Model setup complete!")
-print(f"Vectorizer, Matrix, and Data saved to the '{model_dir}/' directory.")
+    print(f"Model artifacts saved to {MODEL_DIR}")
+
+
+if __name__ == "__main__":
+    main()
